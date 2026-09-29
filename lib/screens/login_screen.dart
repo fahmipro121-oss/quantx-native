@@ -78,9 +78,57 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // Ganti link server tanpa perlu build ulang + install ulang APK — tiap
+  // kali link Cloudflare Tunnel di Termux berubah (misal abis restart),
+  // tinggal buka ini, tempel link barunya.
+  Future<void> _openServerSettings() async {
+    final current = await _api.baseUrl;
+    if (!mounted) return;
+    final ctrl = TextEditingController(text: current);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: QuantXColors.panel,
+        title: const Text('Alamat Server', style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: ctrl,
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+          decoration: const InputDecoration(hintText: 'https://xxxx.trycloudflare.com'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.trim().isNotEmpty) {
+      await _api.setBaseUrl(result);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Alamat server disimpan.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.white38),
+            tooltip: 'Alamat Server',
+            onPressed: _openServerSettings,
+          ),
+        ],
+      ),
+      extendBodyBehindAppBar: true,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),

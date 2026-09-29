@@ -7,7 +7,7 @@ import '../models/account.dart';
 // Termux di-restart). Endpoint-endpointnya sama persis kayak yang dipake
 // versi web (lihat server/auth-server.js) — server SAMA SEKALI nggak
 // diubah buat app native ini.
-const String kBaseUrl = "https://moscow-karl-wednesday-saying.trycloudflare.com";
+const String kBaseUrl = "https://regulations-direction-memphis-sometimes.trycloudflare.com";
 
 class LoginResult {
   final bool ok;
@@ -18,7 +18,28 @@ class LoginResult {
 
 class ApiService {
   static const _tokenKey = 'quantx_token';
+  static const _baseUrlKey = 'quantx_base_url';
   String? _token;
+  String? _baseUrl;
+
+  // URL server dipisah dari kode: defaultnya kBaseUrl di atas, tapi bisa
+  // ditimpa/diganti langsung dari dalam app (layar Setting Server) dan
+  // kesimpen persisten. Ini biar tiap kali link Cloudflare Tunnel berubah
+  // (misal abis Termux di-restart), nggak perlu build ulang + install
+  // ulang APK — tinggal buka app, ganti link-nya, langsung kepake.
+  Future<String> get baseUrl async {
+    if (_baseUrl != null) return _baseUrl!;
+    final prefs = await SharedPreferences.getInstance();
+    _baseUrl = prefs.getString(_baseUrlKey) ?? kBaseUrl;
+    return _baseUrl!;
+  }
+
+  Future<void> setBaseUrl(String url) async {
+    final trimmed = url.trim().replaceAll(RegExp(r'/+$'), ''); // buang trailing slash
+    _baseUrl = trimmed;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_baseUrlKey, trimmed);
+  }
 
   // Token disimpen di SharedPreferences (persisten antar buka-tutup app,
   // sepadan sama localStorage di versi web) supaya user yang udah pernah
@@ -43,9 +64,10 @@ class ApiService {
 
   Future<LoginResult> login(String username, String password) async {
     try {
+      final base = await baseUrl;
       final res = await http
           .post(
-            Uri.parse('$kBaseUrl/api/auth/login'),
+            Uri.parse('$base/api/auth/login'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'username': username, 'password': password}),
           )
@@ -68,8 +90,9 @@ class ApiService {
     await _loadToken();
     if (_token == null) return LoginResult(ok: false, error: 'NO_TOKEN');
     try {
+      final base = await baseUrl;
       final res = await http.get(
-        Uri.parse('$kBaseUrl/api/auth/me'),
+        Uri.parse('$base/api/auth/me'),
         headers: {'Authorization': 'Bearer $_token'},
       ).timeout(const Duration(seconds: 15));
       final body = jsonDecode(res.body) as Map<String, dynamic>;
@@ -85,8 +108,9 @@ class ApiService {
   Future<void> logout() async {
     await _loadToken();
     try {
+      final base = await baseUrl;
       await http.post(
-        Uri.parse('$kBaseUrl/api/auth/logout'),
+        Uri.parse('$base/api/auth/logout'),
         headers: {'Authorization': 'Bearer $_token'},
       ).timeout(const Duration(seconds: 10));
     } catch (_) {
