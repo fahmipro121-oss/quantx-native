@@ -1,0 +1,64 @@
+name: Build QuantX Native APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kode kita (lib/, pubspec.yaml, assets/)
+        uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # Kerangka Android dibikin FRESH pake Flutter asli tiap build (bukan
+      # ditulis manual) — supaya selalu cocok versi Gradle/AGP/Kotlin-nya
+      # dengan versi Flutter yang lagi dipakai runner ini.
+      - name: Buat kerangka project Flutter baru
+        run: flutter create --org com.quantx --project-name quantx_app scaffold
+
+      - name: Ganti nama tampilan app jadi "QUANTX"
+        run: sed -i 's/android:label="quantx_app"/android:label="QUANTX"/' scaffold/android/app/src/main/AndroidManifest.xml
+
+      # Template `flutter create` cuma masang izin INTERNET di manifest
+      # debug/profile, BUKAN di manifest utama yang dipakai build release.
+      # Tanpa ini APK release nggak boleh akses internet sama sekali.
+      - name: Tambah izin INTERNET ke manifest utama
+        run: |
+          F=scaffold/android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' "$F"
+          grep -q 'android.permission.INTERNET' "$F" || { echo "GAGAL: izin INTERNET nggak kepasang"; exit 1; }
+
+      - name: Timpa kerangka pake kode kita
+        run: |
+          cp source/pubspec.yaml scaffold/pubspec.yaml
+          rm -rf scaffold/lib
+          cp -r source/lib scaffold/lib
+          rm -rf scaffold/assets
+          cp -r source/assets scaffold/assets
+
+      - name: Ambil dependency
+        working-directory: scaffold
+        run: flutter pub get
+
+      - name: Generate launcher icon dari assets/icon.png
+        working-directory: scaffold
+        run: dart run flutter_launcher_icons
+
+      - name: Build APK (release)
+        working-directory: scaffold
+        run: flutter build apk --release
+
+      - name: Upload APK sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantx-app-apk
+          path: scaffold/build/app/outputs/flutter-apk/app-release.apk
