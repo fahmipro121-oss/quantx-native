@@ -25,8 +25,8 @@ jobs:
       - name: Buat kerangka project Flutter baru
         run: flutter create --org com.quantx --project-name quantx_app scaffold
 
-      - name: Ganti nama tampilan app jadi "QUANTX"
-        run: sed -i 's/android:label="quantx_app"/android:label="QUANTX"/' scaffold/android/app/src/main/AndroidManifest.xml
+      - name: Ganti nama tampilan app jadi "ORION AI"
+        run: sed -i 's/android:label="quantx_app"/android:label="ORION AI"/' scaffold/android/app/src/main/AndroidManifest.xml
 
       # Template `flutter create` cuma masang izin INTERNET di manifest
       # debug/profile, BUKAN di manifest utama yang dipakai build release.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../theme.dart';
-import 'dashboard_screen.dart';
+import 'animation_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -72,9 +72,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  // Dipanggil abis login sukses ATAU abis kecek sesi lama masih valid —
+  // dua-duanya lewat animasi dulu sebelum masuk Dashboard, konsisten sama
+  // alur di versi web.
   void _goToDashboard(dynamic account) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => DashboardScreen(account: account, api: _api)),
+      MaterialPageRoute(builder: (_) => AnimationScreen(account: account, api: _api)),
     );
   }
 
@@ -139,8 +142,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 text: const TextSpan(
                   style: TextStyle(fontSize: 40, fontWeight: FontWeight.w800, letterSpacing: 1.5),
                   children: [
-                    TextSpan(text: 'QUANT', style: TextStyle(color: Colors.white)),
-                    TextSpan(text: 'X', style: TextStyle(color: QuantXColors.accent)),
+                    TextSpan(text: 'ORION ', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'AI', style: TextStyle(color: QuantXColors.accent)),
                   ],
                 ),
               ),

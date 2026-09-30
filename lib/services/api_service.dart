@@ -2,12 +2,21 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/account.dart';
+import '../models/chat_message.dart';
 
 // GANTI baris ini kalau link Cloudflare Tunnel-nya berubah (misal abis
 // Termux di-restart). Endpoint-endpointnya sama persis kayak yang dipake
 // versi web (lihat server/auth-server.js) — server SAMA SEKALI nggak
 // diubah buat app native ini.
 const String kBaseUrl = "https://regulations-direction-memphis-sometimes.trycloudflare.com";
+
+class OrionResult {
+  final bool ok;
+  final String? reply;
+  final String? error; // RATE_LIMITED | NOT_CONFIGURED | UPSTREAM_ERROR | NETWORK_ERROR
+  final int? unlockAt; // epoch ms, cuma keisi kalau error == RATE_LIMITED
+  OrionResult({required this.ok, this.reply, this.error, this.unlockAt});
+}
 
 class LoginResult {
   final bool ok;
@@ -102,6 +111,45 @@ class ApiService {
       return LoginResult(ok: false, error: body['error'] as String? ?? 'INVALID_TOKEN');
     } catch (_) {
       return LoginResult(ok: false, error: 'NETWORK_ERROR');
+    }
+  }
+
+  // Endpoint & bentuk request ini sama persis kayak yang dipake versi web
+  // (lihat POST /api/orion/chat di server/auth-server.js dan pemanggilnya
+  // di js/app.js) — server nggak tau/nggak peduli yang manggil native
+  // atau web, cukup Authorization: Bearer token yang sama.
+  Future<OrionResult> sendOrionChat({
+    required String message,
+    String? symbol,
+    List<ChatMessage> history = const [],
+  }) async {
+    await _loadToken();
+    try {
+      final base = await baseUrl;
+      final res = await http
+          .post(
+            Uri.parse('$base/api/orion/chat'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_token',
+            },
+            body: jsonEncode({
+              'message': message,
+              'symbol': symbol,
+              'history': history.map((m) => m.toJson()).toList(),
+            }),
+          )
+          .timeout(const Duration(seconds: 90)); // mode /dalam & /panel bisa lama, lihat brain.py
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 429) {
+        return OrionResult(ok: false, error: 'RATE_LIMITED', unlockAt: body['unlockAt'] as int?);
+      }
+      if (body['ok'] == true) {
+        return OrionResult(ok: true, reply: body['reply'] as String?);
+      }
+      return OrionResult(ok: false, error: body['error'] as String? ?? 'UPSTREAM_ERROR');
+    } catch (_) {
+      return OrionResult(ok: false, error: 'NETWORK_ERROR');
     }
   }
 

@@ -3,6 +3,7 @@ import '../models/account.dart';
 import '../services/api_service.dart';
 import '../theme.dart';
 import 'login_screen.dart';
+import 'orion_chat_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final Account account;
@@ -24,13 +25,21 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: QuantXColors.bg,
-        title: const Text('QUANTX', style: TextStyle(fontWeight: FontWeight.w800)),
+        title: const Text('ORION AI', style: TextStyle(fontWeight: FontWeight.w800)),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white54),
             onPressed: () => _logout(context),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: roleColor,
+        icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+        label: const Text('Chat Orion', style: TextStyle(color: Colors.white)),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => OrionChatScreen(account: account, api: api)),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
