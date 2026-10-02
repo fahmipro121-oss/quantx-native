@@ -41,7 +41,8 @@ class DashboardScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => OrionChatScreen(account: account, api: api)),
         ),
       ),
-      body: ListView(
+      body: QuantXBackground(
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Container(
@@ -49,7 +50,10 @@ class DashboardScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: QuantXColors.panel,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: QuantXColors.line),
+              border: Border.all(color: roleColor.withOpacity(0.4)),
+              boxShadow: [
+                BoxShadow(color: roleColor.withOpacity(0.15), blurRadius: 20, spreadRadius: -6),
+              ],
             ),
             child: Row(
               children: [
@@ -61,6 +65,7 @@ class DashboardScreen extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       fontSize: 22,
                       color: roleColor,
+                      shadows: [Shadow(color: roleColor.withOpacity(0.7), blurRadius: 12)],
                     ),
                   ),
                 ),
@@ -70,6 +75,9 @@ class DashboardScreen extends StatelessWidget {
                     color: roleColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(color: roleColor),
+                    boxShadow: [
+                      BoxShadow(color: roleColor.withOpacity(0.5), blurRadius: 10),
+                    ],
                   ),
                   child: Text(account.roleLabel,
                       style: TextStyle(color: roleColor, fontWeight: FontWeight.w700, fontSize: 12)),
@@ -110,6 +118,7 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -118,9 +127,12 @@ class DashboardScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.6), width: 1.5),
+        border: Border.all(color: color.withOpacity(0.7), width: 1.5),
+        boxShadow: [
+          BoxShadow(color: color.withOpacity(0.25), blurRadius: 18, spreadRadius: -4),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,13 +140,14 @@ class DashboardScreen extends StatelessWidget {
           Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 15)),
           const SizedBox(height: 8),
           ...points.map((p) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('•  ', style: TextStyle(color: color)),
+                    Icon(Icons.check_circle, color: color, size: 15),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: Text(p, style: const TextStyle(color: Colors.white70, fontSize: 12.5)),
+                      child: Text(p, style: const TextStyle(color: Colors.white70, fontSize: 12.5, height: 1.3)),
                     ),
                   ],
                 ),

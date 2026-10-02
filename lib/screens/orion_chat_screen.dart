@@ -88,16 +88,46 @@ class _OrionChatScreenState extends State<OrionChatScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: QuantXColors.bg,
-        title: const Text('ORION AI', style: TextStyle(fontWeight: FontWeight.w800)),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 15,
+              backgroundColor: roleColor.withOpacity(0.2),
+              child: Icon(Icons.auto_awesome, color: roleColor, size: 15),
+            ),
+            const SizedBox(width: 10),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('ORION AI', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                Text('🟢 Online', style: TextStyle(color: Colors.white38, fontSize: 10.5)),
+              ],
+            ),
+          ],
+        ),
       ),
-      body: Column(
+      body: QuantXBackground(
+        child: Column(
         children: [
           Expanded(
             child: _messages.isEmpty
-                ? const Center(
-                    child: Text(
-                      'Apa yang mau kamu tanyain soal market?',
-                      style: TextStyle(color: Colors.white38),
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 28,
+                          backgroundColor: roleColor.withOpacity(0.15),
+                          child: Icon(Icons.auto_awesome, color: roleColor, size: 26),
+                        ),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Apa yang mau kamu tanyain soal market?',
+                          style: TextStyle(color: Colors.white38),
+                        ),
+                      ],
                     ),
                   )
                 : ListView.builder(
@@ -154,24 +184,46 @@ class _OrionChatScreenState extends State<OrionChatScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
 
   Widget _bubble(ChatMessage m, Color roleColor) {
     final isUser = m.role == 'user';
+    final bubble = Container(
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
+      decoration: BoxDecoration(
+        color: isUser ? roleColor.withOpacity(0.85) : QuantXColors.panel,
+        borderRadius: BorderRadius.circular(14),
+        border: isUser ? null : Border.all(color: QuantXColors.line),
+        boxShadow: isUser
+            ? [BoxShadow(color: roleColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 3))]
+            : null,
+      ),
+      child: Text(m.text, style: const TextStyle(color: Colors.white, fontSize: 13.5, height: 1.4)),
+    );
+
+    if (isUser) {
+      return Align(alignment: Alignment.centerRight, child: bubble);
+    }
+    // Pesan Orion dikasih avatar kecil di kiri, biar jelas itu balasan AI.
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
-        decoration: BoxDecoration(
-          color: isUser ? roleColor.withOpacity(0.85) : QuantXColors.panel,
-          borderRadius: BorderRadius.circular(14),
-          border: isUser ? null : Border.all(color: QuantXColors.line),
-        ),
-        child: Text(m.text, style: const TextStyle(color: Colors.white, fontSize: 13.5)),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 12,
+            backgroundColor: roleColor.withOpacity(0.2),
+            child: Icon(Icons.auto_awesome, color: roleColor, size: 12),
+          ),
+          const SizedBox(width: 6),
+          Flexible(child: bubble),
+        ],
       ),
     );
   }

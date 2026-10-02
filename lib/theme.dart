@@ -28,6 +28,29 @@ class QuantXColors {
   }
 }
 
+// Latar gradasi gelap yang dipakai bareng di semua layar (login, dashboard,
+// chat) — biar senada, bukan flat hitam polos doang. Warna diambil dari
+// tema "galaksi" yang sama kayak versi web.
+class QuantXBackground extends StatelessWidget {
+  final Widget child;
+  const QuantXBackground({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment(-0.6, -0.9),
+          radius: 1.4,
+          colors: [Color(0xFF141033), Color(0xFF05060D)],
+          stops: [0.0, 0.65],
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
 ThemeData buildQuantXTheme() {
   return ThemeData(
     brightness: Brightness.dark,

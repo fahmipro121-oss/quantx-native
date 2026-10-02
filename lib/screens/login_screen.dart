@@ -132,7 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
       extendBodyBehindAppBar: true,
-      body: SafeArea(
+      body: QuantXBackground(
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
@@ -198,6 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ],
           ),
+        ),
         ),
       ),
     );
